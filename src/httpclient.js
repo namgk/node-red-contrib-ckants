@@ -11,6 +11,7 @@ function post(ckantsEndpoint, token, payload, cb){
   var opts = urllib.parse(ckantsEndpoint);
   opts.headers = {
     'content-type':'application/json', 
+    'content-length': payload.length,
     'Authorization': token
   };
   opts.method = 'POST';

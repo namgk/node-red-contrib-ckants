@@ -16,12 +16,13 @@
 
 var util = require("util");
 var httpclient = require('./httpclient');
+var assert = require('assert');
 
 module.exports = function(RED) {
   "use strict";
 
-  var DATASTORE_API = "/api/3/action/datastore_ts"
-  var DATASTORE_CREATE = DATASTORE_API + "_create"
+  var DATASTORE_API = "/api/3/action/datastore_ts";
+  var DATASTORE_CREATE = DATASTORE_API + "_create";
 
   function validateNode(node){
     if (!node.packageId){
@@ -75,15 +76,21 @@ module.exports = function(RED) {
 
       var endpoint = node.ckan + DATASTORE_CREATE;
 
+      node.log(endpoint);
+      node.log(node.token);
+      node.log(JSON.stringify(payload));
+
       httpclient.post(endpoint, node.token, payload, (res)=>{
-        var res = JSON.parse(res);
-        if (!res.success){
-          node.error(res)
-          return;
+        try {
+          var res = JSON.parse(res);
+          assert(res.success);
+
+          var resourceId = res.result.resource_id;
+          node.warn('resource created, id: ' + resourceId);
+        } catch (err) {
+          node.error(err)
         }
 
-        var resourceId = res.result.resource_id;
-        node.warn('resource created, id: ' + resourceId);
       });
     });
   }

@@ -16,6 +16,7 @@
 
 var util = require("util");
 var httpclient = require('./httpclient');
+var assert = require('assert');
 
 module.exports = function(RED) {
   "use strict";
@@ -75,8 +76,14 @@ module.exports = function(RED) {
       var endpoint = node.ckan + DATASTORE_SEARCH;
 
       httpclient.post(endpoint, node.token, payload, (res)=>{
-        var msg = {payload: res ? res : {"error": "something wrong"}};
-        node.send(msg);
+        try {
+          var res = JSON.parse(res);
+          assert(res.success);
+          var msg = {payload: res};
+          node.send(msg);
+        } catch (err) {
+          node.error(err)
+        }
       });
     });
   }
@@ -112,8 +119,12 @@ module.exports = function(RED) {
       var endpoint = node.ckan + DATASTORE_UPSERT;
    
       httpclient.post(endpoint, node.token, payload, (res)=>{
-        if (!res){
-          node.error('data post failed')
+        try {
+          var res = JSON.parse(res);
+          assert(res.success);
+          node.warn('data upserted');
+        } catch (err) {
+          node.error(err)
         }
       });
     });
