@@ -26,7 +26,10 @@
   },
   "node-red": {
         "nodes"     : {
-            "ckants": "src/ckants.js"
+            "ckants": "src/ckants.js",
+            "ckants_create": "src/ckants_create.js",
+            "ckants_auth": "src/ckants_auth.js"
+
         }
     }
 }

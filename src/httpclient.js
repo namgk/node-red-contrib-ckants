@@ -1,14 +1,17 @@
 
-var http = require("follow-redirects").http;
-var https = require("follow-redirects").https;
+var http = require("http");
+var https = require("https");
 var urllib = require("url");
+var assert = require('assert');
 
-function post(ckantsEndpoint, token, records, cb){
-  var payload = JSON.stringify(records);
+function post(ckantsEndpoint, token, payload, cb){
+  assert(ckantsEndpoint && token && payload);
+
+  var payload = JSON.stringify(payload);
   var opts = urllib.parse(ckantsEndpoint);
   opts.headers = {
     'content-type':'application/json', 
-    'Authentication': token
+    'Authorization': token
   };
   opts.method = 'POST';
 

@@ -20,6 +20,10 @@ var httpclient = require('./httpclient');
 module.exports = function(RED) {
   "use strict";
 
+  var DATASTORE_API = "/api/3/action/datastore_ts"
+  var DATASTORE_UPSERT = DATASTORE_API + "_upsert"
+  var DATASTORE_SEARCH = DATASTORE_API + "_search"
+
   function validateNode(node){
     if (!node.resourceId){
       node.error("No resourceId specified");
@@ -28,19 +32,6 @@ module.exports = function(RED) {
 
     if (!node.auth) {
       node.error("No credentials specified");
-      return false;
-    }
-
-    node.ckan = node.auth.ckan;
-    node.token = node.auth.token;
-
-    if (!node.ckan){
-      node.error("No CKAN endpoint specified");
-      return false;
-    }
-
-    if (!node.token) {
-      node.error("No CKAN token specified");
       return false;
     }
 
@@ -57,8 +48,11 @@ module.exports = function(RED) {
     node.auth = RED.nodes.getNode(n.auth);
 
     if (!validateNode(node)){
-      return;
+      throw "Bad node config";
     }
+
+    node.token = node.auth.token;
+    node.ckan = node.auth.ckan;
 
     node.on("input",function(msg) {
       console.log('firing!');
@@ -69,7 +63,7 @@ module.exports = function(RED) {
       var payload = {
         resource_id: node.resourceId,
         limit: 500//default limit
-      }};
+      };
 
       if (node.fromtime){
         payload.fromtime = node.fromtime;
@@ -78,14 +72,12 @@ module.exports = function(RED) {
         payload.totime = node.totime;
       }
 
-      httpclient.post(node.ckan, node.token, payload, (res)=>{
+      var endpoint = node.ckan + DATASTORE_SEARCH;
+
+      httpclient.post(endpoint, node.token, payload, (res)=>{
         var msg = {payload: res ? res : {"error": "something wrong"}};
         node.send(msg);
       });
-    });
-
-    node.on('close', function() {
-      return
     });
   }
 
@@ -99,9 +91,12 @@ module.exports = function(RED) {
     node.auth = RED.nodes.getNode(n.auth);
 
     if (!validateNode(node)){
-      return;
+      throw "Bad node config";
     }
 
+    node.token = node.auth.token;
+    node.ckan = node.auth.ckan;
+    
     node.on("input",function(msg) {
       console.log('firing!');
       if (!msg || msg.payload == null) {
@@ -112,38 +107,20 @@ module.exports = function(RED) {
         resource_id: node.resourceId,
         method: "insert",
         records: msg.payload
-      }};
-   
-      httpclient.post(node.ckan, node.token, payload, (res)=>{
-        var msg = {payload: res ? res : {"error": "something wrong"}};
-        node.send(msg);
-      });
-    });
+      };
 
-    node.on('close', function() {
-      return
+      var endpoint = node.ckan + DATASTORE_UPSERT;
+   
+      httpclient.post(endpoint, node.token, payload, (res)=>{
+        if (!res){
+          node.error('data post failed')
+        }
+      });
     });
   }
   RED.nodes.registerType("ckants out",CkantsOutNode);
 
-  function CkantsCredentialsNode(n) {
-    RED.nodes.createNode(this,n);
-    var node = this;
-
-    node.ckan = n.ckan;
-
-    if (node.credentials) {
-      node.token = node.credentials.token;
-    }
-  }
-
-  RED.nodes.registerType("ckants-credentials", CkantsCredentialsNode, {
-    credentials: {
-      token: {type:"text"}
-    }
-  });
-
-  RED.httpAdmin.post("/ckants/:id", RED.auth.needsPermission("ckants.query"), function(req,res) {
+  RED.httpAdmin.post("/ckants_search/:id", RED.auth.needsPermission("ckants.query"), function(req,res) {
     var node = RED.nodes.getNode(req.params.id);
     if (node != null) {
       try {
