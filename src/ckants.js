@@ -15,7 +15,7 @@
  **/
 
 var util = require("util");
-var httpclient;
+var httpclient = require('./httpclient');
 
 module.exports = function(RED) {
   "use strict";
@@ -62,13 +62,27 @@ module.exports = function(RED) {
 
     node.on("input",function(msg) {
       console.log('firing!');
-      if (msg != null) {
-        // execute http post, forward result
-        var msg = {payload:'test'};
-        node.send(msg)
+      if (msg == null) {
+        return;
       }
-    });
 
+      var payload = {
+        resource_id: node.resourceId,
+        limit: 500//default limit
+      }};
+
+      if (node.fromtime){
+        payload.fromtime = node.fromtime;
+      }
+      if (node.totime){
+        payload.totime = node.totime;
+      }
+
+      httpclient.post(node.ckan, node.token, payload, (res)=>{
+        var msg = {payload: res ? res : {"error": "something wrong"}};
+        node.send(msg);
+      });
+    });
 
     node.on('close', function() {
       return
@@ -90,9 +104,20 @@ module.exports = function(RED) {
 
     node.on("input",function(msg) {
       console.log('firing!');
-      if (msg != null) {
-        // execute http post
+      if (!msg || msg.payload == null) {
+        return;
       }
+
+      var payload = {
+        resource_id: node.resourceId,
+        method: "insert",
+        records: msg.payload
+      }};
+   
+      httpclient.post(node.ckan, node.token, payload, (res)=>{
+        var msg = {payload: res ? res : {"error": "something wrong"}};
+        node.send(msg);
+      });
     });
 
     node.on('close', function() {

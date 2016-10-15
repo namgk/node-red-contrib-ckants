@@ -3,8 +3,7 @@ var http = require("follow-redirects").http;
 var https = require("follow-redirects").https;
 var urllib = require("url");
 
-function insert(records, ckantsEndpoint, token){
-  // TODO: discover this endpoint or get from settings
+function post(ckantsEndpoint, token, records, cb){
   var payload = JSON.stringify(records);
   var opts = urllib.parse(ckantsEndpoint);
   opts.headers = {
@@ -20,12 +19,14 @@ function insert(records, ckantsEndpoint, token){
         result += chunk;
     });
     res.on('end',function() {
-        console.log(result);
+      console.log(result);
+      cb(result);  
     });
   });
 
   req.on('error',function(err) {
     console.log(err);
+    cb(null);
   });
 
   if (payload){
@@ -36,5 +37,5 @@ function insert(records, ckantsEndpoint, token){
 }
 
 module.exports = {
-  insert: insert
+  post: post
 }
