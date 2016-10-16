@@ -51,7 +51,7 @@ module.exports = function(RED) {
 
     node.on("input",function(msg) {
       console.log('firing!');
-      if (msg == null) {
+      if (!msg || !msg.payload) {
         return;
       }
 
@@ -65,6 +65,19 @@ module.exports = function(RED) {
       }
       if (node.totime){
         payload.totime = node.totime;
+      }
+      if (node.timezone){
+        payload.timezone = node.timezone;
+      }
+      // overriding from msg.payload if any
+      if (msg.payload.fromtime){
+        payload.fromtime = msg.payload.fromtime;
+      }
+      if (msg.payload.totime){
+        payload.totime = msg.payload.totime;
+      }
+      if (msg.payload.timezone){
+        payload.timezone = msg.payload.timezone;
       }
 
       var endpoint = node.ckan + DATASTORE_SEARCH;
@@ -115,37 +128,33 @@ module.exports = function(RED) {
 
       var endpoint = node.ckan + DATASTORE_UPSERT;
       
-      // node.status({fill:"yellow",shape:"dot",text:"requesting..."});
       httpclient.post(endpoint, node.token, payload, function(res){
         try {
           var res = JSON.parse(res);
           assert(res.success);
-          // node.status({fill:"green",shape:"dot",text:"success"});
+          node.status({fill:"green",shape:"dot",text:"success"});
         } catch (err) {
           node.error(res)
-          // node.status({fill:"red",shape:"dot",text:"error"});
         }
-        // (function(node){
-        //   setTimeout(function(){node.status({})},2000)
-        // })(node);
+        setTimeout(function(){node.status({})},2000)
       });
     });
   }
   RED.nodes.registerType("ckants insert",CkantsInsertNode);
 
-  RED.httpAdmin.post("/ckants_search/:id", RED.auth.needsPermission("ckants.search"), function(req,res) {
-    var node = RED.nodes.getNode(req.params.id);
-    if (node != null) {
-      try {
-          node.receive();
-          res.sendStatus(200);
-      } catch(err) {
-          res.sendStatus(500);
-          node.error(RED._("ckants.failed",{error:err.toString()}));
-      }
-    } else {
-        res.sendStatus(404);
-    }
-  });
+  // RED.httpAdmin.post("/ckants_search/:id", RED.auth.needsPermission("ckants.search"), function(req,res) {
+  //   var node = RED.nodes.getNode(req.params.id);
+  //   if (node != null) {
+  //     try {
+  //         node.receive();
+  //         res.sendStatus(200);
+  //     } catch(err) {
+  //         res.sendStatus(500);
+  //         node.error(RED._("ckants.failed",{error:err.toString()}));
+  //     }
+  //   } else {
+  //       res.sendStatus(404);
+  //   }
+  // });
 
 }
