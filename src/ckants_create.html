@@ -14,44 +14,44 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="ckants create">
-<!--    <div class="form-tips"><p>This node creates a new CKAN Timeseries datastore resource</p> -->
+<script type="text/x-red" data-help-name="ckants create">
+  <p>This node creates a new CKAN Timeseries datastore resource. It allows to specify the resource schema to be stored (i.e the fields of the data, like latitude, longitude of coordinate data).</p>
+</script>
 
+<script type="text/x-red" data-template-name="ckants create">
   <div class="form-row">
-    <label for="node-input-auth"><i class="fa"></i> CKAN Auth</label>
+    <label for="node-input-auth"><i class="fa"></i> CKAN Auth:</label>
     <input type="text" id="node-input-auth">
   </div>
 
   <div class="form-row">
-  <label for="node-input-name"><i class="fa"></i> Name</label>
+  <label for="node-input-name"><i class="fa"></i> Name:</label>
   <input type="text" id="node-input-name">
   </div>
 
-  <div class="form-row">
+<!--   <div class="form-row">
   <label for="node-input-description"><i class="fa"></i> Description</label>
   <input type="text" id="node-input-description">
-  </div>
+  </div> -->
 
   <div class="form-row">
-  <label for="node-input-package"><i class="fa"></i> Package ID</label>
+  <label for="node-input-package"><i class="fa"></i> Package ID:</label>
   <input type="text" id="node-input-package">
   </div>
 
   <div class="form-row node-input-field-container-row">
+    <label for="node-input-field-container" style="width: 100%;"><i class="fa"></i> Fields: choose the field type and specify its name.</label>
     <ol id="node-input-field-container"></ol>
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="ckants create">
-  <p>This node creates a new CKAN Timeseries datastore resource</p>
-</script>
 
 <script type="text/javascript">
   var color = "#f2f2f2";
 
   RED.nodes.registerType('ckants create', {
     color: color,
-    category: 'output',
+    category: 'ckants',
     defaults: {
       auth: {type:"ckants-credentials",required:true},
       name: {value:""},
@@ -67,14 +67,18 @@
     },
     oneditprepare: function() {
       var node = this;
+
       var text = {value:"text",label:"text:"};
       var int = {value:"int",label:"int:"};
       var float = {value:"float",label:"float:"};
-      var time = {value:"timestamp",label:"time:"};
+      var bool = {value:"bool",label:"bool:"};
+      var date = {value:"date",label:"date:"};
+      var json = {value:"json",label:"json:"};
+      var time = {value:"time",label:"time:"};
       var timez = {value:"time with time zone",label:"timez:"};
       var timestamp = {value:"timestamp",label:"timestamp:"};
       var timestampz = {value:"timestamp with time zone",label:"timestampz:"};
-      var supportedTypes = [text, int, float, time, timez, timestamp, timestampz];
+      var supportedTypes = [text, int, float, bool, json, date, time, timez, timestamp, timestampz];
 
       $("#node-input-field-container").css('min-height','250px').css('min-width','450px').editableList({
         addItem: function(container,i,opt) {

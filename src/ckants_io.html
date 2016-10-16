@@ -14,8 +14,11 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="ckants out">
-  <div class="form-tips"><p>This node sends data to CKAN Timeseries Datastore via datastore_ts_upsert API</p>
+<script type="text/x-red" data-help-name="ckants insert">
+  <p>This node sends data to CKAN Timeseries Datastore via datastore_ts_upsert API. It receives a msg whose payload is an array of records to be pushed to the CKAN resource. The records should conform the resource schema as specified when the resource was being created.</p>
+</script>
+
+<script type="text/x-red" data-template-name="ckants insert">
   <div class="form-row">
     <label for="node-input-auth"><i class="fa"></i> CKAN Auth</label>
     <input type="text" id="node-input-auth">
@@ -26,12 +29,13 @@
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="ckants out">
-  <p>This node sends data to CKAN Timeseries Datastore, fromtime and totime are in ISO8601 format or can be expressed as 'last 1d,2h,3m,4s', 'last 1s', 'last 2000m,5d',...</p>
+
+<script type="text/x-red" data-help-name="ckants search">
+    <p>This node gets data from CKAN Timeseries Datastore. Default limit for returning results is 500 records per request. There's paging support in the response</p>
 </script>
 
-<script type="text/x-red" data-template-name="ckants in">
-  <div class="form-tips"><p>This node gets data from CKAN Timeseries Datastore</p>
+<script type="text/x-red" data-template-name="ckants search">
+  <div class="form-tips"><p>Fromtime and totime can be specified as "last 1d,3s", "last 40s,10m,2d" or as iso8601 standard as "2016-10-11T21:27:00-07:00"</p>
   <div class="form-row">
     <label for="node-input-auth"><i class="fa"></i> CKAN Auth</label>
     <input type="text" id="node-input-auth">
@@ -42,23 +46,20 @@
   </div>
   <div class="form-row">
     <label for="node-input-fromtime"><i class="icon-tag"></i>From time</label>
-    <input type="text" id="node-input-fromtime" placeholder="2016-10-11T21:27:00-07:00">
+    <input type="text" id="node-input-fromtime" placeholder="last 5m">
   </div>
   <div class="form-row">
     <label for="node-input-totime"><i class="icon-tag"></i>To time</label>
-    <input type="text" id="node-input-totime" placeholder="2016-10-31">
+    <input type="text" id="node-input-totime" placeholder="last 1s">
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="ckants in">
-    <p>This node gets data from CKAN Timeseries Datastore</p>
-</script>
 
 <script type="text/javascript">
   var color = "#f2f2f2"
 
-  RED.nodes.registerType('ckants out',{
-    category: 'output',
+  RED.nodes.registerType('ckants insert',{
+    category: 'ckants',
     defaults: {
       resourceId: {required:true},
       auth: {type:"ckants-credentials",required:true}
@@ -76,8 +77,8 @@
     }
   });
 
-  RED.nodes.registerType('ckants in',{
-    category: 'input',
+  RED.nodes.registerType('ckants search',{
+    category: 'Ckan Timeseries',
     defaults: {
       resourceId: {required:true},
       auth: {type:"ckants-credentials",required:true},

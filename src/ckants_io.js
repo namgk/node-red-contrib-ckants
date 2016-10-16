@@ -27,19 +27,15 @@ module.exports = function(RED) {
 
   function validateNode(node){
     if (!node.resourceId){
-      node.error("No resourceId specified");
-      return false;
+      throw "No resourceId specified";
     }
 
     if (!node.auth) {
-      node.error("No credentials specified");
-      return false;
+      throw "No credentials specified";
     }
-
-    return true;
   }
 
-  function CkantsInNode(n) {
+  function CkantsSearchNode(n) {
     RED.nodes.createNode(this,n);
     var node = this;
 
@@ -48,9 +44,7 @@ module.exports = function(RED) {
     node.totime = n.totime;
     node.auth = RED.nodes.getNode(n.auth);
 
-    if (!validateNode(node)){
-      throw "Bad node config";
-    }
+    validateNode(node);
 
     node.token = node.auth.token;
     node.ckan = node.auth.ckan;
@@ -75,38 +69,41 @@ module.exports = function(RED) {
 
       var endpoint = node.ckan + DATASTORE_SEARCH;
 
-      httpclient.post(endpoint, node.token, payload, (res)=>{
+      httpclient.post(endpoint, node.token, payload, function(res){
         try {
           var res = JSON.parse(res);
           assert(res.success);
           var msg = {payload: res};
           node.send(msg);
         } catch (err) {
-          node.error(err)
+          node.error(res)
         }
       });
     });
   }
 
-  RED.nodes.registerType("ckants in",CkantsInNode);
+  RED.nodes.registerType("ckants search",CkantsSearchNode);
 
-  function CkantsOutNode(n) {
+  function CkantsInsertNode(n) {
     RED.nodes.createNode(this,n);
     var node = this;
 
     node.resourceId = n.resourceId;
     node.auth = RED.nodes.getNode(n.auth);
 
-    if (!validateNode(node)){
-      throw "Bad node config";
-    }
+    validateNode(node);
 
     node.token = node.auth.token;
     node.ckan = node.auth.ckan;
     
     node.on("input",function(msg) {
-      console.log('firing!');
       if (!msg || msg.payload == null) {
+        node.error('no input');
+        return;
+      }
+
+      if (!Array.isArray(msg.payload)){
+        node.error('this node receives an array of objects');
         return;
       }
 
@@ -117,21 +114,26 @@ module.exports = function(RED) {
       };
 
       var endpoint = node.ckan + DATASTORE_UPSERT;
-   
-      httpclient.post(endpoint, node.token, payload, (res)=>{
+      
+      // node.status({fill:"yellow",shape:"dot",text:"requesting..."});
+      httpclient.post(endpoint, node.token, payload, function(res){
         try {
           var res = JSON.parse(res);
           assert(res.success);
-          node.warn('data upserted');
+          // node.status({fill:"green",shape:"dot",text:"success"});
         } catch (err) {
-          node.error(err)
+          node.error(res)
+          // node.status({fill:"red",shape:"dot",text:"error"});
         }
+        // (function(node){
+        //   setTimeout(function(){node.status({})},2000)
+        // })(node);
       });
     });
   }
-  RED.nodes.registerType("ckants out",CkantsOutNode);
+  RED.nodes.registerType("ckants insert",CkantsInsertNode);
 
-  RED.httpAdmin.post("/ckants_search/:id", RED.auth.needsPermission("ckants.query"), function(req,res) {
+  RED.httpAdmin.post("/ckants_search/:id", RED.auth.needsPermission("ckants.search"), function(req,res) {
     var node = RED.nodes.getNode(req.params.id);
     if (node != null) {
       try {

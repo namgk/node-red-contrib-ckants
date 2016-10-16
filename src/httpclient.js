@@ -30,7 +30,7 @@ function post(ckantsEndpoint, token, payload, cb){
 
   req.on('error',function(err) {
     console.log(err);
-    cb(null);
+    cb(err);
   });
 
   if (payload){

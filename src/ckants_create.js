@@ -26,21 +26,16 @@ module.exports = function(RED) {
 
   function validateNode(node){
     if (!node.packageId){
-      node.error("No packageId specified");
-      return false;
+      throw "No packageId specified";
     }
 
     if (!node.fields) {
-      node.error("No fields specified");
-      return false;
+      throw "No fields specified";
     }
 
     if (!node.auth) {
-      node.error("No credentials specified");
-      return false;
+      throw "No credentials specified";
     }
-
-    return true;
   }
 
   function CkantsCreateNode(n) {
@@ -52,9 +47,7 @@ module.exports = function(RED) {
     node.fields = n.fields;
     node.auth = RED.nodes.getNode(n.auth);
 
-    if (!validateNode(node)){
-      throw "Bad node config";
-    }
+    validateNode(node);
 
     node.token = node.auth.token;
     node.ckan = node.auth.ckan;
@@ -80,17 +73,21 @@ module.exports = function(RED) {
       node.log(node.token);
       node.log(JSON.stringify(payload));
 
-      httpclient.post(endpoint, node.token, payload, (res)=>{
+      node.status({fill:"yellow",shape:"dot",text:"requesting..."});
+      httpclient.post(endpoint, node.token, payload, function(res){
         try {
           var res = JSON.parse(res);
           assert(res.success);
-
           var resourceId = res.result.resource_id;
+          node.status({fill:"green",shape:"dot",text:"success"});
           node.warn('resource created, id: ' + resourceId);
         } catch (err) {
-          node.error(err)
+          node.error(res)
+          node.status({fill:"red",shape:"dot",text:"error"});
         }
-
+        (function(node){
+          setTimeout(function(){node.status({})},2000)
+        })(node);
       });
     });
   }
