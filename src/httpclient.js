@@ -11,25 +11,22 @@ function post(ckantsEndpoint, token, payload, cb){
   var opts = urllib.parse(ckantsEndpoint);
   opts.headers = {
     'content-type':'application/json', 
-    'content-length': payload.length,
+    'content-length': Buffer.byteLength(payload, 'utf8'),
     'Authorization': token
   };
   opts.method = 'POST';
 
   var req = ((/^https/.test(ckantsEndpoint))?https:http).request(opts,function(res) {
-    console.log(res.statusCode);
     var result = '';
     res.on('data',function(chunk) {
         result += chunk;
     });
     res.on('end',function() {
-      console.log(result);
       cb(result);  
     });
   });
 
   req.on('error',function(err) {
-    console.log(err);
     cb(err);
   });
 
