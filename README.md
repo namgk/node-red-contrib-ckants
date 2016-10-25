@@ -1,7 +1,86 @@
-# node-red-contrib-dnr
+# node-red-contrib-ckants
 
-[![DNRNode](https://github.com/namgk/node-red-contrib-dnr/raw/master/dnrnode.png)](#features)
+[![CKANTS Node](https://snag.gy/BIaEOm.jpg)](#features)
 
-DNRNode helps wire together different devices in a Distribuetd Node-RED flow by using MQTT broker.
+CKANTS nodes help interfacing with CKAN Timeseries Datastore API <https://github.com/namgk/ckan-timeseries>
 
-Refer to <https://github.com/namgk/dnr-editor> and here <https://github.com/namgk/dnr-daemon> for a complete Distributed Node-RED ecosystem.
+Currently the collection has three nodes: 
+* a Create node for creating a new CKAN Timeseries Datastore resource
+* an Insert node for pushing data to the created resource
+* a Search node for querying data from the resource
+
+All these nodes require CKANTS Credentials to be configured. The Credentials includes 
+* a CKAN host url, the CKAN host needs to have the CKAN Timeseries Datastore extension installed (pip install ckanext-datastore_ts)
+* a CKAN user token, which is the CKAN API Key and can be found at the bottom left corner of CKAN user profile page: http://\<ckan host\>/user/\<username\>
+
+![CKANTS Credentials](https://snag.gy/3YVtGS.jpg)
+
+## Create Node
+
+This node creates a new CKAN Timeseries Datastore resource in the datastore database.
+
+It requires a Package ID, which is a name of a CKAN dataset. Recall in CKAN, actual data records are stored in CKAN Resources and CKAN Resources are grouped into packages called CKAN dataset. A dataset can be created on CKAN web interface by an authorized user.
+
+The resource name is optional, if left blank, CKAN will named it "Undefined"
+
+With this node, you can define the schema of the data to be stored in the CKAN datastore.
+
+![CKANTS Create](https://snag.gy/SZiuas.jpg)
+
+In this example, we create a resource name "Buses" that holds the real-time data of all public buses in Vancouver, BC. The resource is held in a dataset called "Vancouver-BC".
+
+It currently has two fields, an Address and a Latitude fields. The dropdown menu to the left of the field name helps choosing the field types. Supported types according to CKAN are: text, int, float, bool, json, date, time, timez, timestamp, timestampz.
+
+After properly configure the node, you deploy the node by clicking Deploy on Node-RED. The actual create request will be sent by clicking the trigger button of the create node.
+
+If the operation is success, you will find the newly created resource with its ID shown in the Debug tab:
+
+![CKANTS Created](https://snag.gy/8NmeLl.jpg)
+
+IMPORTANT! Keep this resource ID safe somewhere since we are going to use it in subsequent insert and search operations.
+
+## Insert Node
+
+This node pushes the message payload it receives to a corresponding resource. Its configuration only has a Resource ID which specifies the destined CKAN Resource of the data
+
+![CKANTS Insert](https://snag.gy/lGBOzo.jpg)
+
+In order to actually push the data, in this example we create a new function node and a inject node for triggering. The function node crafts a message payload that has the exact data according to the data schema created by Create Node.
+
+The function node looks like this:
+
+![Crafting data](https://snag.gy/zNAuKd.jpg)
+
+IMPORTANT! The Insert node receives an array of records, not an object.
+
+The insert flow looks like this:
+
+![Insert flow](https://snag.gy/tFIOkZ.jpg)
+
+After clicking the trigger, you will find a success status as follow:
+
+![Insert success](https://snag.gy/X0y4vY.jpg)
+
+## Search Node
+
+This node helps send a query to CKAN Timeseries Datastore. Similar to the Insert node, it requires a resource ID where the data is stored.
+
+![Search](https://snag.gy/QfHMpa.jpg)
+
+The other two optional query parameters are fromtime and totime. These parameters are used to query for data based on time frame when the data is recorded in the database. Format of fromtime and totime follows ISO 8601 standard and a custom format. The custom format is a quick and easy way to specify which time frame of data to be returned relatively to the current moment. 
+
+Custom formats look like:
+
+* last 2m --> will be translated to a timestamp from 2 minutes ago relatively to the current time
+* last 2d,2m --> last 2 days and 2 minutes
+* last 2h,2s,2m --> last 2 hours, 2 minutes and 2 seconds
+* ...
+
+The whole flow looks like this:
+
+![Search flow](https://snag.gy/9hzvRJ.jpg)
+
+When triggered, the query will be sent to CKAN Timeseries Datastore and results be forward to the Debugger node.
+
+![Search result](https://snag.gy/dG1os5.jpg)
+
