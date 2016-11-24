@@ -50,11 +50,6 @@ module.exports = function(RED) {
     node.ckan = node.auth.ckan;
 
     node.on("input",function(msg) {
-      console.log('firing!');
-      if (!msg || !msg.payload) {
-        return;
-      }
-
       var payload = {
         resource_id: node.resourceId,
         limit: 500//default limit
@@ -70,15 +65,15 @@ module.exports = function(RED) {
         payload.timezone = node.timezone;
       }
       // overriding from msg.payload if any
-      if (msg.payload.fromtime){
+      try {
         payload.fromtime = msg.payload.fromtime;
-      }
-      if (msg.payload.totime){
+      } catch (e){}
+      try {
         payload.totime = msg.payload.totime;
-      }
-      if (msg.payload.timezone){
+      } catch (e){}
+      try {
         payload.timezone = msg.payload.timezone;
-      }
+      } catch (e){}
 
       var endpoint = node.ckan + DATASTORE_SEARCH;
 
@@ -86,8 +81,7 @@ module.exports = function(RED) {
         try {
           var res = JSON.parse(res);
           assert(res.success);
-          var msg = {payload: res};
-          node.send(msg);
+          node.send({payload: res.result});
         } catch (err) {
           node.error(res)
         }
@@ -142,19 +136,19 @@ module.exports = function(RED) {
   }
   RED.nodes.registerType("ckants insert",CkantsInsertNode);
 
-  // RED.httpAdmin.post("/ckants_search/:id", RED.auth.needsPermission("ckants.search"), function(req,res) {
-  //   var node = RED.nodes.getNode(req.params.id);
-  //   if (node != null) {
-  //     try {
-  //         node.receive();
-  //         res.sendStatus(200);
-  //     } catch(err) {
-  //         res.sendStatus(500);
-  //         node.error(RED._("ckants.failed",{error:err.toString()}));
-  //     }
-  //   } else {
-  //       res.sendStatus(404);
-  //   }
-  // });
+  RED.httpAdmin.post("/ckants_search/:id", RED.auth.needsPermission("ckants.search"), function(req,res) {
+    var node = RED.nodes.getNode(req.params.id);
+    if (node != null) {
+      try {
+          node.receive();
+          res.sendStatus(200);
+      } catch(err) {
+          res.sendStatus(500);
+          node.error(RED._("ckants.failed",{error:err.toString()}));
+      }
+    } else {
+        res.sendStatus(404);
+    }
+  });
 
 }

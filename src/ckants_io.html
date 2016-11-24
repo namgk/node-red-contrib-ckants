@@ -27,6 +27,10 @@
     <label for="node-input-resourceId"><i class="icon-tag"></i>Resource Id</label>
     <input type="text" id="node-input-resourceId" placeholder="CKAN resource Id">
   </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name </label>
+    <input type="text" id="node-input-name" placeholder="A name for this node">
+  </div>
 </script>
 
 
@@ -43,6 +47,10 @@
   <div class="form-row">
     <label for="node-input-resourceId"><i class="fa fa-tag"></i> Resource Id</label>
     <input type="text" id="node-input-resourceId" placeholder="CKAN resource Id">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name </label>
+    <input type="text" id="node-input-name" placeholder="A name for this node">
   </div>
   <div class="form-row">
     <label for="node-input-fromtime"><i class="icon-tag"></i>From time</label>
@@ -62,6 +70,7 @@
     category: 'ckants',
     defaults: {
       resourceId: {required:true},
+      name: {required:false},
       auth: {type:"ckants-credentials",required:true}
     },
     color:color,
@@ -70,10 +79,10 @@
     icon: "ckan_logo.png",
     align: "right",
     label: function() {
-        return "ckants insert";
+        return this.name || "ckants insert";
     },
     labelStyle: function() {
-        return this.name?"node_label_italic":"";
+        return this.name ? "node_label_italic" : "";
     }
   });
 
@@ -81,6 +90,7 @@
     category: 'ckants',
     defaults: {
       resourceId: {required:true},
+      name: {required:false},
       auth: {type:"ckants-credentials",required:true},
       fromtime: {value:"2016-10-11T21:27:00-07:00",required:false},
       totime: {value:"2016-10-31",required:false}
@@ -91,35 +101,35 @@
     icon: "ckan_logo.png",
     align: "left",
     label: function() {
-        return "ckants search";
+        return this.name || "ckants search";
     },
     labelStyle: function() {
         return this.name?"node_label_italic":"";
+    },
+    button: {
+      onclick: function() {
+        console.log('querying')
+        var node = this;
+        $.ajax({
+          url: "ckants_search/"+this.id,
+          type:"POST",
+          success: function(resp) {
+              RED.notify(node._("success"),"success");
+          },
+          error: function(jqXHR,textStatus,errorThrown) {
+              if (jqXHR.status == 404) {
+                  RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
+              } else if (jqXHR.status == 500) {
+                  RED.notify(node._("common.notification.error",{message:node._("ckants.errors.failed")}),"error");
+              } else if (jqXHR.status == 0) {
+                  RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
+              } else {
+                  RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
+              }
+            }
+        });
+      }
     }
-    // button: {
-    //   onclick: function() {
-    //     console.log('querying')
-    //     var node = this;
-    //     $.ajax({
-    //       url: "ckants_search/"+this.id,
-    //       type:"POST",
-    //       success: function(resp) {
-    //           RED.notify(node._("success"),"success");
-    //       },
-    //       error: function(jqXHR,textStatus,errorThrown) {
-    //           if (jqXHR.status == 404) {
-    //               RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
-    //           } else if (jqXHR.status == 500) {
-    //               RED.notify(node._("common.notification.error",{message:node._("ckants.errors.failed")}),"error");
-    //           } else if (jqXHR.status == 0) {
-    //               RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
-    //           } else {
-    //               RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
-    //           }
-    //         }
-    //     });
-    //   }
-    // }
   });
 
 </script>
