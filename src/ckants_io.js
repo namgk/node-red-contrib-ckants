@@ -81,7 +81,7 @@ module.exports = function(RED) {
         try {
           var res = JSON.parse(res);
           assert(res.success);
-          node.send({payload: res.result});
+          node.send({payload: res});
         } catch (err) {
           node.error(res)
         }
