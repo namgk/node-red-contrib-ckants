@@ -2,22 +2,22 @@
 
 [![CKANTS Node](https://snag.gy/BIaEOm.jpg)](#features)
 
-CKANTS nodes help interfacing with CKAN Timeseries Datastore API <https://github.com/namgk/ckan-timeseries>
+CKANTS nodes help interfacing with CKAN Timeseries extension <https://github.com/namgk/ckan-timeseries>. If you don't have a CKAN instance or don't want to install the Timeseries extension, you can create an account at <http://hub.urbanopus.net> and publish your data there for free (data quota applied).
 
 Currently the collection has three nodes: 
-* a Create node for creating a new CKAN Timeseries Datastore resource
+* a Create node for creating a new CKAN Timeseries resource
 * an Insert node for pushing data to the created resource
 * a Search node for querying data from the resource
 
 All these nodes require CKANTS Credentials to be configured. The Credentials includes 
-* a CKAN host url, the CKAN host needs to have the CKAN Timeseries Datastore extension installed (pip install ckanext-datastore_ts)
+* a CKAN host url, the CKAN host needs to have the CKAN Timeseries extension installed (refer to its repo)
 * a CKAN user token, which is the CKAN API Key and can be found at the bottom left corner of CKAN user profile page: http://\<ckan host\>/user/\<username\>
 
 ![CKANTS Credentials](https://snag.gy/3YVtGS.jpg)
 
 ## Create Node
 
-This node creates a new CKAN Timeseries Datastore resource in the datastore database.
+This node creates a new CKAN Timeseries resource in the datastore database.
 
 It requires a Package ID, which is a name of a CKAN dataset. Recall in CKAN, actual data records are stored in CKAN Resources and CKAN Resources are grouped into packages called CKAN dataset. A dataset can be created on CKAN web interface by an authorized user.
 
@@ -63,7 +63,7 @@ After clicking the trigger, you will find a success status as follow:
 
 ## Search Node
 
-This node helps send a query to CKAN Timeseries Datastore. Similar to the Insert node, it requires a resource ID where the data is stored.
+This node helps send a query to CKAN Timeseries. Similar to the Insert node, it requires a resource ID where the data is stored.
 
 ![Search](https://snag.gy/QfHMpa.jpg)
 
