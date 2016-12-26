@@ -50,6 +50,10 @@ module.exports = function(RED) {
     node.ckan = node.auth.ckan;
 
     node.on("input",function(msg) {
+      if (!msg.payload){
+        msg.payload = {}
+      }
+      
       var payload = {
         resource_id: node.resourceId,
         limit: 500//default limit
@@ -65,17 +69,47 @@ module.exports = function(RED) {
         payload.timezone = node.timezone;
       }
       // overriding from msg.payload if any
-      try {
+      // this needs to be strict as CKAN won't ignore foreign parameters
+      if (msg.payload.q) {
+        payload.q = msg.payload.q;
+      } 
+      if (msg.payload.filters) {
+        payload.filters = msg.payload.filters;
+      } 
+      if (msg.payload.distinct) {
+        payload.distinct = msg.payload.distinct;
+      } 
+      if (msg.payload.plain) {
+        payload.plain = msg.payload.plain;
+      } 
+      if (msg.payload.language) {
+        payload.language = msg.payload.language;
+      } 
+      if (msg.payload.limit) {
+        payload.limit = msg.payload.limit;
+      } 
+      if (msg.payload.offset) {
+        payload.offset = msg.payload.offset;
+      } 
+      if (msg.payload.sort) {
+        payload.sort = msg.payload.sort;
+      } 
+      if (msg.payload.fields) {
+        payload.fields = msg.payload.fields;
+      } 
+      if (msg.payload.fromtime) {
         payload.fromtime = msg.payload.fromtime;
-      } catch (e){}
-      try {
+      } 
+      if (msg.payload.totime) {
         payload.totime = msg.payload.totime;
-      } catch (e){}
-      try {
+      } 
+      if (msg.payload.timezone) {
         payload.timezone = msg.payload.timezone;
-      } catch (e){}
+      } 
 
       var endpoint = node.ckan + DATASTORE_SEARCH;
+
+      node.warn(payload)
 
       httpclient.post(endpoint, node.token, payload, function(res){
         try {
@@ -110,8 +144,8 @@ module.exports = function(RED) {
       }
 
       if (!Array.isArray(msg.payload)){
-        node.error('this node receives an array of objects');
-        return;
+        node.warn('this node receives an array of records, converting msg.payload into an array');
+        msg.payload = [msg.payload]
       }
 
       var payload = {
