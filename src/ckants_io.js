@@ -50,6 +50,10 @@ module.exports = function(RED) {
     node.ckan = node.auth.ckan;
 
     node.on("input",function(msg) {
+      if (!msg){
+        msg = {payload: {}}
+      }
+
       if (!msg.payload){
         msg.payload = {}
       }
@@ -108,8 +112,6 @@ module.exports = function(RED) {
       } 
 
       var endpoint = node.ckan + DATASTORE_SEARCH;
-
-      node.warn(payload)
 
       httpclient.post(endpoint, node.token, payload, function(res){
         try {
