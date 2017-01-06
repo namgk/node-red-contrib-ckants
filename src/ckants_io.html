@@ -15,7 +15,10 @@
 -->
 
 <script type="text/x-red" data-help-name="ckants insert">
-  <p>This node sends data to CKAN Timeseries Datastore via datastore_ts_upsert API. It receives a msg whose payload is an array of records to be pushed to the CKAN resource. The records should conform the resource schema as specified when the resource was being created.</p>
+  <p>This node sends data to CKAN Timeseries Datastore via datastore_ts_upsert API. </p> 
+  <br>It receives a msg whose payload is an <b>array</b> of records to be pushed to the CKAN resource.</br>
+
+  <br>The records should conform the resource schema as specified when the resource was being created: <b>correct data type</b>, <b>have exact number of fields</b>.</br>
 </script>
 
 <script type="text/x-red" data-template-name="ckants insert">
@@ -36,10 +39,15 @@
 
 <script type="text/x-red" data-help-name="ckants search">
     <p>This node gets data from CKAN Timeseries Datastore. Default limit for returning results is 500 records per request. There is paging support in the response</p>
+
+    <br>It looks for all possible parameters in msg.payload to build 
+    the query. 'fromtime' and 'totime' properties found in msg.payload overwrite ones found in this node's configurations</br>
+
+    <br>Details on the parameters: <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search">CKAN Datstore</a></br>
 </script>
 
 <script type="text/x-red" data-template-name="ckants search">
-  <div class="form-tips"><p>Fromtime and totime can be specified as "last 1d,3s", "last 40s,10m,2d" or as iso8601 standard as "2016-10-11T21:27:00-07:00"</p>
+  <div class="form-tips"><p>From time and To time can be specified as "last 1d,3s", "last 40s,10m,2d" or as iso8601 standard as "2016-10-11T21:27:00-07:00", "2016-10-31"</p>
   <div class="form-row">
     <label for="node-input-auth"><i class="fa"></i> CKAN Auth</label>
     <input type="text" id="node-input-auth">
@@ -114,15 +122,15 @@
           url: "ckants_search/"+this.id,
           type:"POST",
           success: function(resp) {
-              RED.notify("Node triggered","success");
+            RED.notify("Node triggered","success");
           },
           error: function(jqXHR,textStatus,errorThrown) {
-              if (jqXHR.status == 404) {
-                  RED.notify("Node not deployed","error");
-              } else {
-                  RED.notify('Status: ' + jqXHR.status + ', ' + textStatus,"error");
-              }
+            if (jqXHR.status == 404) {
+                RED.notify("Node not deployed","error");
+            } else {
+                RED.notify('Status: ' + jqXHR.status + ', ' + textStatus,"error");
             }
+          }
         });
       }
     }

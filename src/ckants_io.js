@@ -113,10 +113,13 @@ module.exports = function(RED) {
 
       var endpoint = node.ckan + DATASTORE_SEARCH;
 
+      node.status({fill:"green",shape:"dot",text:"working..."});
+
       httpclient.post(endpoint, node.token, payload, function(res){
         try {
           var res = JSON.parse(res);
           assert(res.success);
+          node.status({})
           node.send({payload: res});
         } catch (err) {
           node.error(res)

@@ -1,8 +1,7 @@
 {
   "name": "node-red-contrib-ckants",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "nodes used to interact with CKAN Timeseries extension",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -25,11 +24,10 @@
   "dependencies": {
   },
   "node-red": {
-        "nodes": {
-            "ckants": "src/ckants_io.js",
-            "ckants_create": "src/ckants_create.js",
-            "ckants_auth": "src/ckants_auth.js"
-
-        }
+    "nodes": {
+      "ckants": "src/ckants_io.js",
+      "ckants_create": "src/ckants_create.js",
+      "ckants_auth": "src/ckants_auth.js"
     }
+  }
 }
