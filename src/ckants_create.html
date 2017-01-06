@@ -144,7 +144,7 @@
           url: "ckants_create/"+this.id,
           type:"POST",
           success: function(resp) {
-              RED.notify(node._("success"),"success");
+            RED.notify("Node triggered","success"); 
           },
           error: function(jqXHR,textStatus,errorThrown) {
             if (jqXHR.status == 404) {
