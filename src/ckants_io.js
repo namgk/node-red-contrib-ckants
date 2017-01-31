@@ -21,9 +21,14 @@ var assert = require('assert');
 module.exports = function(RED) {
   "use strict";
 
-  var DATASTORE_API = "/api/3/action/datastore_ts"
+  var TIMESERIES_API = "/api/3/action/datastore_ts";
+  var DATASTORE_API = "/api/3/action/datastore";
+
   var DATASTORE_UPSERT = DATASTORE_API + "_upsert"
   var DATASTORE_SEARCH = DATASTORE_API + "_search"
+
+  var TIMESERIES_UPSERT = TIMESERIES_API + "_upsert"
+  var TIMESERIES_SEARCH = TIMESERIES_API + "_search"
 
   function validateNode(node){
     if (!node.resourceId){
@@ -36,15 +41,17 @@ module.exports = function(RED) {
   }
 
   function CkantsSearchNode(n) {
+    validateNode(n);
+
     RED.nodes.createNode(this,n);
     var node = this;
 
     node.resourceId = n.resourceId;
+    node.timeseries = n.timeseries;
     node.fromtime = n.fromtime;
     node.totime = n.totime;
     node.auth = RED.nodes.getNode(n.auth);
 
-    validateNode(node);
 
     node.token = node.auth.token;
     node.ckan = node.auth.ckan;
@@ -111,7 +118,12 @@ module.exports = function(RED) {
         payload.timezone = msg.payload.timezone;
       } 
 
-      var endpoint = node.ckan + DATASTORE_SEARCH;
+      if (!node.timeseries){
+        delete payload.fromtime
+        delete payload.totime
+      }
+
+      var endpoint = node.ckan + (node.timeseries ? TIMESERIES_SEARCH : DATASTORE_SEARCH);
 
       node.status({fill:"green",shape:"dot",text:"working..."});
 
@@ -119,25 +131,31 @@ module.exports = function(RED) {
         try {
           var res = JSON.parse(res);
           assert(res.success);
-          node.status({})
           node.send({payload: res});
         } catch (err) {
+          node.status({fill:"red",shape:"dot",text:"error"})
           node.error(res)
         }
+
+        setTimeout(function(){
+          node.status({})
+        }, 2000)
       });
     });
   }
 
-  RED.nodes.registerType("ckants search",CkantsSearchNode);
+  RED.nodes.registerType("ckants search", CkantsSearchNode);
 
   function CkantsInsertNode(n) {
+    validateNode(n);
+
     RED.nodes.createNode(this,n);
     var node = this;
 
     node.resourceId = n.resourceId;
     node.auth = RED.nodes.getNode(n.auth);
+    node.timeseries = n.timeseries;
 
-    validateNode(node);
 
     node.token = node.auth.token;
     node.ckan = node.auth.ckan;
@@ -149,7 +167,7 @@ module.exports = function(RED) {
       }
 
       if (!Array.isArray(msg.payload)){
-        node.warn('this node receives an array of records, converting msg.payload into an array');
+        // this node receives an array of records, converting msg.payload into an array
         msg.payload = [msg.payload]
       }
 
@@ -159,7 +177,7 @@ module.exports = function(RED) {
         records: msg.payload
       };
 
-      var endpoint = node.ckan + DATASTORE_UPSERT;
+      var endpoint = node.ckan + (node.timeseries ? TIMESERIES_UPSERT : DATASTORE_UPSERT);
       
       httpclient.post(endpoint, node.token, payload, function(res){
         try {

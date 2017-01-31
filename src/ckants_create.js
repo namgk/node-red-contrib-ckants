@@ -21,7 +21,10 @@ var assert = require('assert');
 module.exports = function(RED) {
   "use strict";
 
-  var DATASTORE_API = "/api/3/action/datastore_ts";
+  var TIMESERIES_API = "/api/3/action/datastore_ts";
+  var DATASTORE_API = "/api/3/action/datastore";
+
+  var TIMESERIES_CREATE = TIMESERIES_API + "_create";
   var DATASTORE_CREATE = DATASTORE_API + "_create";
 
   function validateNode(node){
@@ -39,15 +42,16 @@ module.exports = function(RED) {
   }
 
   function CkantsCreateNode(n) {
+    validateNode(n);
+
     RED.nodes.createNode(this,n);
     var node = this;
 
-    node.packageId = n.package;
+    node.packageId = n.packageId;
+    node.timeseries = n.timeseries;
     node.name = n.name;
     node.fields = n.fields;
     node.auth = RED.nodes.getNode(n.auth);
-
-    validateNode(node);
 
     node.token = node.auth.token;
     node.ckan = node.auth.ckan;
@@ -66,8 +70,11 @@ module.exports = function(RED) {
       if (node.description){
         payload.resource.description = node.description;
       }
+      if (node.timeseries){
+        payload.resource.format = 'timeseries'
+      }
 
-      var endpoint = node.ckan + DATASTORE_CREATE;
+      var endpoint = node.ckan + (node.timeseries ? TIMESERIES_CREATE : DATASTORE_CREATE);
 
       node.log(endpoint);
       node.log(node.token);

@@ -15,10 +15,13 @@
 -->
 
 <script type="text/x-red" data-help-name="ckants insert">
-  <p>This node sends data to CKAN Timeseries Datastore via datastore_ts_upsert API. </p> 
-  <br>It receives a msg whose payload is an <b>array</b> of records to be pushed to the CKAN resource.</br>
+  <p>This node sends data to CKAN Datastore via datastore_upsert API. </p> 
+  <p>It receives a msg whose payload is an <b>array</b> of records to be pushed to the CKAN Datastore resource.</p>
 
-  <br>The records should conform the resource schema as specified when the resource was being created: <b>correct data type</b>, <b>have exact number of fields</b>.</br>
+  <p>It also supports sending data to CKAN Timeseries API, a new extension that allows CKAN to work with timeseries data. More at <a href="https://github.com/namgk/ckan-timeseries">CKAN Timeseries Github</a></p>
+
+  <p>The records should conform the resource schema as specified when the resource was being created: <b>correct data type</b>, <b>have exact number of fields</b>.</p>
+  <p><b>Note: Timeseries API will not be able to work with resources created by original Datastore API</b></p>
 </script>
 
 <script type="text/x-red" data-template-name="ckants insert">
@@ -34,16 +37,24 @@
     <label for="node-input-name"><i class="fa fa-tag"></i> Name </label>
     <input type="text" id="node-input-name" placeholder="A name for this node">
   </div>
+  <div class="form-row">
+    <label>Timeseries?</label>
+    <input type="checkbox" id="node-input-timeseries" style="display: inline-block; width: auto; vertical-align: top;">
+  </div>
 </script>
 
 
 <script type="text/x-red" data-help-name="ckants search">
     <p>This node gets data from CKAN Timeseries Datastore. Default limit for returning results is 500 records per request. There is paging support in the response</p>
 
-    <br>It looks for all possible parameters in msg.payload to build 
-    the query. 'fromtime' and 'totime' properties found in msg.payload overwrite ones found in this node's configurations</br>
+    <p>It also support getting data from CKAN Timeseries Datastore API, a new extension that allows CKAN to work with timeseries data. More at <a href="https://github.com/namgk/ckan-timeseries">CKAN Timeseries Github</a></p>
 
-    <br>Details on the parameters: <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search">CKAN Datstore</a></br>
+    <p>It looks for all possible parameters in msg.payload to build 
+    the query. 'fromtime' and 'totime' properties found in msg.payload overwrite ones found in this node s configurations</p>
+
+    <p>Details on the parameters: <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search">CKAN Datstore</a></p>
+
+    <p><b>Note: Timeseries API will not be able to work with resources created by original Datastore API</b></p>
 </script>
 
 <script type="text/x-red" data-template-name="ckants search">
@@ -59,6 +70,10 @@
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i> Name </label>
     <input type="text" id="node-input-name" placeholder="A name for this node">
+  </div>
+  <div class="form-row">
+    <label>Timeseries?</label>
+    <input type="checkbox" id="node-input-timeseries" style="display: inline-block; width: auto; vertical-align: top;">
   </div>
   <div class="form-row">
     <label for="node-input-fromtime"><i class="icon-tag"></i>From time</label>
@@ -79,6 +94,7 @@
     defaults: {
       resourceId: {required:true},
       name: {required:false},
+      timeseries: {value:false, required:false},
       auth: {type:"ckants-credentials",required:true}
     },
     color:color,
@@ -100,6 +116,7 @@
       resourceId: {required:true},
       name: {required:false},
       auth: {type:"ckants-credentials",required:true},
+      timeseries: {value:false, required:false},
       fromtime: {value:"",required:false},
       totime: {value:"",required:false}
     },
@@ -113,6 +130,12 @@
     },
     labelStyle: function() {
         return this.name?"node_label_italic":"";
+    },
+    oneditprepare: function(){
+      $("#node-input-timeseries").change(function() {
+          $("#node-input-fromtime").prop('disabled', !this.checked);
+          $("#node-input-totime").prop('disabled', !this.checked);
+      });
     },
     button: {
       onclick: function() {
