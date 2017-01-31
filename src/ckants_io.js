@@ -132,14 +132,15 @@ module.exports = function(RED) {
           var res = JSON.parse(res);
           assert(res.success);
           node.send({payload: res});
+          node.status({})
         } catch (err) {
           node.status({fill:"red",shape:"dot",text:"error"})
           node.error(res)
+          setTimeout(function(){
+            node.status({})
+          }, 2000)
         }
 
-        setTimeout(function(){
-          node.status({})
-        }, 2000)
       });
     });
   }
