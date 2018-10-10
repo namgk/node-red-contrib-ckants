@@ -24,11 +24,15 @@ module.exports = function(RED) {
   var TIMESERIES_API = "/api/3/action/datastore_ts";
   var DATASTORE_API = "/api/3/action/datastore";
 
-  var DATASTORE_UPSERT = DATASTORE_API + "_upsert"
-  var DATASTORE_SEARCH = DATASTORE_API + "_search"
+  var DATASTORE_UPSERT = DATASTORE_API + "_upsert";
+  var DATASTORE_SEARCH = DATASTORE_API + "_search";
+  // Constants for SQL Search
+  var DATASTORE_SEARCH_SQL = DATASTORE_API + "_search_sql";
 
-  var TIMESERIES_UPSERT = TIMESERIES_API + "_upsert"
-  var TIMESERIES_SEARCH = TIMESERIES_API + "_search"
+  var TIMESERIES_UPSERT = TIMESERIES_API + "_upsert";
+  var TIMESERIES_SEARCH = TIMESERIES_API + "_search";
+  // Constants for SQL Search
+  var TIMESERIES_SEARCH_SQL = TIMESERIES_API + "_search_sql";
 
   function validateNode(node){
     if (!node.resourceId){
@@ -146,6 +150,49 @@ module.exports = function(RED) {
   }
 
   RED.nodes.registerType("ckants search", CkantsSearchNode);
+
+  /* Exposes SQL Query portion of the CKAN API for use. */
+  function CkantsSQLSearchNode(n) {
+    validateNode(n);
+
+    RED.nodes.createNode(this, n);
+    var node = this;
+
+    node.resourceId = n.resourceId;
+    node.auth = RED.nodes.getNode(n.auth);
+    node.timeseries = n.timeseries;
+
+    node.token = node.auth.token;
+    node.ckan = node.auth.ckan;    
+
+    node.on("input",function(msg) {
+      if (!msg || msg.payload == null) {
+          node.error('no input');
+          return;
+      }
+
+      // Note: Query here is constructed differently to other functions as per the CKAN API.
+      var endpoint = node.ckan + (node.timeseries ? TIMESERIES_SEARCH_SQL : DATASTORE_SEARCH_SQL);
+      endpoint += "?sql=" + msg.payload; 
+
+      httpclient.post(endpoint, node.token, {}, function(res){
+        try  {
+            var res = JSON.parse(res);
+            assert(res.success);
+            node.send({payload: res});
+            node.status({})
+        } catch (err) {
+            node.status({fill:"red",shape:"dot",text:"error"});
+            node.error(res);
+            setTimeout(function(){
+                node.status({});
+            }, 2000)
+        }
+      });
+    });  
+  }
+
+  RED.nodes.registerType("ckants sql search",CkantsSQLSearchNode);
 
   function CkantsInsertNode(n) {
     validateNode(n);
