@@ -166,8 +166,8 @@ module.exports = function(RED) {
 
     node.on("input",function(msg) {
       if (!msg || msg.payload == null) {
-          node.error('no input');
-          return;
+        node.error('no input');
+        return;
       }
 
       // Note: Query here is constructed differently to other functions as per the CKAN API.
@@ -176,16 +176,16 @@ module.exports = function(RED) {
 
       httpclient.post(endpoint, node.token, {}, function(res){
         try  {
-            var res = JSON.parse(res);
-            assert(res.success);
-            node.send({payload: res});
-            node.status({})
+          var res = JSON.parse(res);
+          assert(res.success);
+          node.send({payload: res});
+          node.status({})
         } catch (err) {
-            node.status({fill:"red",shape:"dot",text:"error"});
-            node.error(res);
-            setTimeout(function(){
-                node.status({});
-            }, 2000)
+          node.status({fill:"red",shape:"dot",text:"error"});
+          node.error(res);
+          setTimeout(function(){
+            node.status({});
+          }, 2000)
         }
       });
     });  

@@ -6,38 +6,38 @@ var assert = require('assert');
 
  
 function post(ckantsEndpoint, token, payload, cb){
-    assert(ckantsEndpoint && token && payload);
+  assert(ckantsEndpoint && token && payload);
 
-    var payload = JSON.stringify(payload);
-    var opts = urllib.parse(ckantsEndpoint);
-    opts.headers = {
-        'content-type':'application/json', 
-        'content-length': Buffer.byteLength(payload, 'utf8'),
-        'Authorization': token
-    };
-    opts.method = 'POST';
+  var payload = JSON.stringify(payload);
+  var opts = urllib.parse(ckantsEndpoint);
+  opts.headers = {
+    'content-type':'application/json', 
+    'content-length': Buffer.byteLength(payload, 'utf8'),
+    'Authorization': token
+  };
+  opts.method = 'POST';
 
-    var req = ((/^https/.test(ckantsEndpoint))?https:http).request(opts,function(res) {
-        var result = '';
-        res.on('data',function(chunk) {
-            result += chunk;
-        });
-        res.on('end',function() {
-           cb(result);  
-        });
+  var req = ((/^https/.test(ckantsEndpoint))?https:http).request(opts,function(res) {
+    var result = '';
+    res.on('data',function(chunk) {
+      result += chunk;
     });
-
-    req.on('error',function(err) {
-        cb(err);
+    res.on('end',function() {
+      cb(result);  
     });
+  });
 
-    if (payload){
-        req.write(payload);
-    }
+  req.on('error',function(err) {
+    cb(err);
+  });
 
-    req.end();
+  if (payload){
+    req.write(payload);
+  }
+
+  req.end();
 }
 
 module.exports = {
-    post: post
+  post: post
 }
