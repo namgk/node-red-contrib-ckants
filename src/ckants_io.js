@@ -34,8 +34,8 @@ module.exports = function(RED) {
   // Constants for SQL Search
   var TIMESERIES_SEARCH_SQL = TIMESERIES_API + "_search_sql";
 
-  function validateNode(node){
-    if (!node.resourceId){
+  function validateNode(node, sqlSearch){
+    if (!node.resourceId && !sqlSearch){ // SQL search only needs the resource ID to be in the query.
       throw "No resourceId specified";
     }
 
@@ -45,7 +45,7 @@ module.exports = function(RED) {
   }
 
   function CkantsSearchNode(n) {
-    validateNode(n);
+    validateNode(n, false);
 
     RED.nodes.createNode(this,n);
     var node = this;
@@ -153,12 +153,11 @@ module.exports = function(RED) {
 
   /* Exposes SQL Query portion of the CKAN API for use. */
   function CkantsSQLSearchNode(n) {
-    validateNode(n);
+    validateNode(n, true);
 
     RED.nodes.createNode(this, n);
     var node = this;
 
-    node.resourceId = n.resourceId;
     node.auth = RED.nodes.getNode(n.auth);
     node.timeseries = n.timeseries;
 
@@ -195,7 +194,7 @@ module.exports = function(RED) {
   RED.nodes.registerType("ckants sql search",CkantsSQLSearchNode);
 
   function CkantsInsertNode(n) {
-    validateNode(n);
+    validateNode(n, false);
 
     RED.nodes.createNode(this,n);
     var node = this;

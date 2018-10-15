@@ -85,17 +85,15 @@
   </div>
 </script>
 
-<!-- FRESH STUFF -->
-
 
 <script type="text/x-red" data-help-name="ckants sql search">
     <p>This node exposes the CKAN SQL query API to allow full use of SQL queries. The query to be executed will be taken from msg.payload.</p>
 
-    <p>It also tentatively works with the Timeseries API (provided that SQL support is a feature in Timeseries, IDK) More info found at <a href="https://github.com/namgk/ckan-timeseries">CKAN Timeseries Github</a></p>
+    <p>It also works with the Timeseries API. More information can be found at <a href="https://github.com/namgk/ckan-timeseries">CKAN Timeseries Github</a></p>
 
-    <p>If the query is unsuccessful there should be a juicy error message hopefully.</p>
+    <p>The return values are either a successful response to the query containing the records that match or a descriptive error message.</p>
 
-    <p>Details on the parameters: ...will be added if this all works.</p>
+    <p>The only required parameter for this node is a properly configured CKAN authentication. There is also the option to set a name though this is not required.</p>
 
     <p><b>Note: Timeseries API will not be able to work with resources created by original Datastore API</b></p>
 </script>
@@ -106,17 +104,11 @@
     <input type="text" id="node-input-auth">
   </div>
   <div class="form-row">
-    <label for="node-input-resourceId"><i class="fa fa-tag"></i> Resource Id</label>
-    <input type="text" id="node-input-resourceId" placeholder="CKAN resource Id">
-  </div>
-  <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i> Name </label>
     <input type="text" id="node-input-name" placeholder="A name for this node">
   </div>
 </script>
 
-
-<!-- END OF FRESH STUFF -->
 
 <script type="text/javascript">
   var color = "#f2f2f2"
@@ -142,12 +134,9 @@
     }
   });
 
-  /* FRESH STUFF */
-
   RED.nodes.registerType('ckants sql search', {
     category: 'ckants',
     defaults: {
-      resourceId: {required:true},
       auth: {type:"ckants-credentials", required:true},
       name: {required:false}
     },
@@ -163,8 +152,6 @@
         return this.name ? "node_label_italic" : "";
     }
   });
-
-  /* END OF FRESH STUFF */
 
   RED.nodes.registerType('ckants search',{
     category: 'ckants',
