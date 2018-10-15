@@ -87,17 +87,21 @@ When triggered, the query will be sent to CKAN Timeseries Datastore and results 
 ![Search result](https://snag.gy/dG1os5.jpg)
 
 ## SQL Search Node
-This node sends a user defined SQL query to CKAN. It requires valid CKAN authentications and a valid SQL search query piped into the node input.
+This node sends a user defined SQL query to CKAN.
 
 ![SQL Search Config](https://snag.gy/qo1yRn.jpg)
+
+Queries can be performed by loading the message payload with an SQL query in string format and then piping this in to the SQL Search node. Such an operation can be performed using a function node. This configuration allows for easier automation and programatic query generation.
 
 ![Constructing a Query](https://snag.gy/NECJzv.jpg)
 __NOTE: It is important that the resource ID is wrapped in broken out quotes (as seen above).__
 
 The whole flow looks like this:
+
 ![Search SQL Flow](https://snag.gy/MNnDmA.jpg)
 
 When triggered, output should look something like this:
+
 ![SQL Search Result](https://snag.gy/HyaNWp.jpg)
 
 From this point users can drill down into the records to get the query results.
