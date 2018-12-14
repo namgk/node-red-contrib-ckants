@@ -21,7 +21,7 @@ var assert = require('assert');
 module.exports = function(RED) {
   "use strict";
 
-  var TIMESERIES_API = "/api/3/action/datastore_ts";
+  var TIMESERIES_API = "/api/3/action/timeseries";
   var DATASTORE_API = "/api/3/action/datastore";
 
   var DATASTORE_UPSERT = DATASTORE_API + "_upsert";
