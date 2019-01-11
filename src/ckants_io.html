@@ -45,16 +45,16 @@
 
 
 <script type="text/x-red" data-help-name="ckants search">
-    <p>This node gets data from CKAN Timeseries Datastore. Default limit for returning results is 500 records per request. There is paging support in the response</p>
+  <p>This node gets data from CKAN Timeseries Datastore. Default limit for returning results is 500 records per request. There is paging support in the response</p>
 
-    <p>It also support getting data from CKAN Timeseries Datastore API, a new extension that allows CKAN to work with timeseries data. More at <a href="https://github.com/namgk/ckan-timeseries">CKAN Timeseries Github</a></p>
+  <p>It also support getting data from CKAN Timeseries Datastore API, a new extension that allows CKAN to work with timeseries data. More at <a href="https://github.com/namgk/ckan-timeseries">CKAN Timeseries Github</a></p>
 
-    <p>It looks for all possible parameters in msg.payload to build 
-    the query. 'fromtime' and 'totime' properties found in msg.payload overwrite ones found in this node s configurations</p>
+  <p>It looks for all possible parameters in msg.payload to build 
+  the query. 'fromtime' and 'totime' properties found in msg.payload overwrite ones found in this node s configurations</p>
 
-    <p>Details on the parameters: <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search">CKAN Datstore</a></p>
+  <p>Details on the parameters: <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search">CKAN Datstore</a></p>
 
-    <p><b>Note: Timeseries API will not be able to work with resources created by original Datastore API</b></p>
+  <p><b>Note: Timeseries API will not be able to work with resources created by original Datastore API</b></p>
 </script>
 
 <script type="text/x-red" data-template-name="ckants search">
@@ -86,6 +86,30 @@
 </script>
 
 
+<script type="text/x-red" data-help-name="ckants sql search">
+  <p>This node exposes the CKAN SQL query API to allow full use of SQL queries. The query to be executed will be taken from msg.payload.</p>
+
+  <p>It also works with the Timeseries API. More information can be found at <a href="https://github.com/namgk/ckan-timeseries">CKAN Timeseries Github</a></p>
+
+  <p>The return values are either a successful response to the query containing the records that match or a descriptive error message.</p>
+
+  <p>The only required parameter for this node is a properly configured CKAN authentication. There is also the option to set a name though this is not required.</p>
+
+  <p><b>Note: Timeseries API will not be able to work with resources created by original Datastore API</b></p>
+</script>
+
+<script type="text/x-red" data-template-name="ckants sql search">
+  <div class="form-row">
+    <label for="node-input-auth"><i class="fa"></i> CKAN Auth</label>
+    <input type="text" id="node-input-auth">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name </label>
+    <input type="text" id="node-input-name" placeholder="A name for this node">
+  </div>
+</script>
+
+
 <script type="text/javascript">
   var color = "#f2f2f2"
 
@@ -104,6 +128,25 @@
     align: "right",
     label: function() {
         return this.name || "ckants insert";
+    },
+    labelStyle: function() {
+        return this.name ? "node_label_italic" : "";
+    }
+  });
+
+  RED.nodes.registerType('ckants sql search', {
+    category: 'ckants',
+    defaults: {
+      auth: {type:"ckants-credentials", required:true},
+      name: {required:false}
+    },
+    color: color,
+    inputs:1,
+    outputs:1,
+    icon: "ckan_logo.png",
+    align: "right",
+    label: function() {
+        return this.name || "ckants sql search";
     },
     labelStyle: function() {
         return this.name ? "node_label_italic" : "";

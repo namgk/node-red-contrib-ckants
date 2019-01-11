@@ -1,13 +1,15 @@
+
 # node-red-contrib-ckants
 
-[![CKANTS Node](https://snag.gy/BIaEOm.jpg)](#features)
+[![CKANTS Node](https://snag.gy/4gzVSO.jpg)](#features)
 
 CKANTS nodes help interfacing with CKAN Timeseries extension <https://github.com/namgk/ckan-timeseries>. If you don't have a CKAN instance or don't want to install the Timeseries extension, you can create an account at <http://hub.urbanopus.net> and publish your data there for free (data quota applied).
 
-Currently the collection has three nodes: 
+Currently the collection has four nodes: 
 * a Create node for creating a new CKAN Timeseries resource
 * an Insert node for pushing data to the created resource
 * a Search node for querying data from the resource
+* an SQL search node to perform more powerful queries on a resource
 
 All these nodes require CKANTS Credentials to be configured. The Credentials includes 
 * a CKAN host url, the CKAN host needs to have the CKAN Timeseries extension installed (refer to its repo)
@@ -84,3 +86,22 @@ When triggered, the query will be sent to CKAN Timeseries Datastore and results 
 
 ![Search result](https://snag.gy/dG1os5.jpg)
 
+## SQL Search Node
+This node sends a user defined SQL query to CKAN.
+
+![SQL Search Config](https://snag.gy/qo1yRn.jpg)
+
+Queries can be performed by loading the message payload with an SQL query in string format and then piping this in to the SQL Search node. Such an operation can be performed using a function node. This configuration allows for easier automation and programatic query generation.
+
+![Constructing a Query](https://snag.gy/NECJzv.jpg)
+__NOTE: It is important that the resource ID is wrapped in broken out quotes (as seen above).__
+
+The whole flow looks like this:
+
+![Search SQL Flow](https://snag.gy/MNnDmA.jpg)
+
+When triggered, output should look something like this:
+
+![SQL Search Result](https://snag.gy/HyaNWp.jpg)
+
+From this point users can drill down into the records to get the query results.

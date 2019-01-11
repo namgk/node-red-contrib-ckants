@@ -4,6 +4,7 @@ var https = require("https");
 var urllib = require("url");
 var assert = require('assert');
 
+ 
 function post(ckantsEndpoint, token, payload, cb){
   assert(ckantsEndpoint && token && payload);
 
@@ -19,7 +20,7 @@ function post(ckantsEndpoint, token, payload, cb){
   var req = ((/^https/.test(ckantsEndpoint))?https:http).request(opts,function(res) {
     var result = '';
     res.on('data',function(chunk) {
-        result += chunk;
+      result += chunk;
     });
     res.on('end',function() {
       cb(result);  
