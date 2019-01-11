@@ -21,8 +21,7 @@
     "url": "https://github.com/namgk/node-red-contrib-ckants/issues"
   },
   "homepage": "https://github.com/namgk/node-red-contrib-ckants#readme",
-  "dependencies": {
-  },
+  "dependencies": {},
   "node-red": {
     "nodes": {
       "ckants": "src/ckants_io.js",
