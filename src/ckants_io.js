@@ -240,6 +240,67 @@ module.exports = function(RED) {
   }
   RED.nodes.registerType("ckants insert",CkantsInsertNode);
 
+  function CkantsInsertOutputNode(n) {
+    validateNode(n, false);
+
+    RED.nodes.createNode(this,n);
+    var node = this;
+
+    node.resourceId = n.resourceId;
+    node.auth = RED.nodes.getNode(n.auth);
+    node.timeseries = n.timeseries;
+
+
+    node.token = node.auth.token;
+    node.ckan = node.auth.ckan;
+
+    node.on("input",function(msg) {
+      if (!msg || msg.payload == null) {
+        node.error('no input');
+        return;
+      }
+
+      if (!Array.isArray(msg.payload)){
+        // this node receives an array of records, converting msg.payload into an array
+        msg.payload = [msg.payload]
+      }
+
+      var payload = {
+        resource_id: node.resourceId,
+        method: "insert",
+        records: msg.payload
+      };
+
+      var endpoint = node.ckan + (node.timeseries ? TIMESERIES_UPSERT : DATASTORE_UPSERT);
+
+      httpclient.post(endpoint, node.token, payload, function(res){
+        try {
+          // Parse the response.
+          let res = JSON.parse(res);
+          assert(res.success);
+
+          // Update the existing msg object with the response.
+          for (let key of Object.keys(res)) {
+            msg.payload[key] = res[key]
+          }
+
+          // Forward the response.
+          node.status({fill:"green",shape:"dot",text:"success"});
+          node.send(msg);
+        }
+        catch (err) {
+          // Handle the error case.
+          node.status({fill:"red",shape:"dot",text:"error"});
+          msg.payload.success = false;
+          node.error(res);
+          node.send(msg);
+        }
+        setTimeout(function(){node.status({})},2000)
+      });
+    });
+  }
+  RED.nodes.registerType("ckants insert (output)",CkantsInsertOutputNode);
+
   RED.httpAdmin.post("/ckants_search/:id", RED.auth.needsPermission("ckants.search"), function(req,res) {
     var node = RED.nodes.getNode(req.params.id);
     if (node != null) {
