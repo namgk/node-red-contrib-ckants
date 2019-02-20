@@ -43,6 +43,37 @@
   </div>
 </script>
 
+<script type="text/x-red" data-help-name="ckants insert output">
+  <p>This node sends data to CKAN Datastore via datastore_upsert API. </p>
+  <p>It receives a msg whose payload is an <b>array</b> of records to be pushed to the CKAN Datastore resource.</p>
+
+  <p>It also supports sending data to CKAN Timeseries API, a new extension that allows CKAN to work with timeseries data. More at <a href="https://github.com/namgk/ckan-timeseries">CKAN Timeseries Github</a></p>
+
+  <p>The records should conform the resource schema as specified when the resource was being created: <b>correct data type</b>, <b>have exact number of fields</b>.</p>
+  <p><b>Note: Timeseries API will not be able to work with resources created by original Datastore API</b></p>
+
+  <p>The node returns whether the insert into CKAN was successful, in addition to the existing msg object. This allows you to return a success or failure HTTP response to the request initializer depending on the value in <b>msg.payload.success</b>.</p>
+</script>
+
+<script type="text/x-red" data-template-name="ckants insert output">
+  <div class="form-row">
+    <label for="node-input-auth"><i class="fa"></i> CKAN Auth</label>
+    <input type="text" id="node-input-auth">
+  </div>
+  <div class="form-row">
+    <label for="node-input-resourceId"><i class="icon-tag"></i>Resource Id</label>
+    <input type="text" id="node-input-resourceId" placeholder="CKAN resource Id">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name </label>
+    <input type="text" id="node-input-name" placeholder="A name for this node">
+  </div>
+  <div class="form-row">
+    <label>Timeseries?</label>
+    <input type="checkbox" id="node-input-timeseries" style="display: inline-block; width: auto; vertical-align: top;">
+  </div>
+</script>
+
 
 <script type="text/x-red" data-help-name="ckants search">
   <p>This node gets data from CKAN Timeseries Datastore. Default limit for returning results is 500 records per request. There is paging support in the response</p>
@@ -128,6 +159,27 @@
     align: "right",
     label: function() {
         return this.name || "ckants insert";
+    },
+    labelStyle: function() {
+        return this.name ? "node_label_italic" : "";
+    }
+  });
+
+  RED.nodes.registerType('ckants insert output',{
+    category: 'ckants',
+    defaults: {
+      resourceId: {required:true},
+      name: {required:false},
+      timeseries: {value:false, required:false},
+      auth: {type:"ckants-credentials",required:true}
+    },
+    color:color,
+    inputs:1,
+    outputs:1,
+    icon: "ckan_logo.png",
+    align: "right",
+    label: function() {
+        return this.name || "ckants insert output";
     },
     labelStyle: function() {
         return this.name ? "node_label_italic" : "";
