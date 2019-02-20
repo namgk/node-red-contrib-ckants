@@ -270,36 +270,33 @@ module.exports = function(RED) {
         method: "insert",
         records: msg.payload
       };
+      msg.payload = {};
 
       var endpoint = node.ckan + (node.timeseries ? TIMESERIES_UPSERT : DATASTORE_UPSERT);
 
-      httpclient.post(endpoint, node.token, payload, function(res){
+      httpclient.post(endpoint, node.token, payload, function(res) {
         try {
           // Parse the response.
-          let res = JSON.parse(res);
-          assert(res.success);
-
-          // Update the existing msg object with the response.
-          for (let key of Object.keys(res)) {
-            msg.payload[key] = res[key]
-          }
+          let response = JSON.parse(res);
+          assert(response.success);
 
           // Forward the response.
           node.status({fill:"green",shape:"dot",text:"success"});
+          msg.payload.success = true;
           node.send(msg);
         }
         catch (err) {
           // Handle the error case.
           node.status({fill:"red",shape:"dot",text:"error"});
           msg.payload.success = false;
-          node.error(res);
+          node.error(err);
           node.send(msg);
         }
         setTimeout(function(){node.status({})},2000)
       });
     });
   }
-  RED.nodes.registerType("ckants insert (output)",CkantsInsertOutputNode);
+  RED.nodes.registerType("ckants insert output",CkantsInsertOutputNode);
 
   RED.httpAdmin.post("/ckants_search/:id", RED.auth.needsPermission("ckants.search"), function(req,res) {
     var node = RED.nodes.getNode(req.params.id);
